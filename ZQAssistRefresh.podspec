@@ -30,16 +30,16 @@ Pod::Spec.new do |s|
     } withPage:[RefreshPageModel pageWithSize:10 index:0]];
                        DESC
 
-  s.homepage         = 'git@github.com:KeyFive/ZQAssistRefresh.git'
+  s.homepage         = 'https://github.com/KeyFive/ZQAssistRefresh.git'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { '${USER_NAME}' => '${USER_EMAIL}' }
-  s.source           = { :git => 'git@github.com:KeyFive/ZQAssistRefresh.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/KeyFive/ZQAssistRefresh.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '8.0'
 
-  s.source_files = '${POD_NAME}/Classes/**/*'
+  s.source_files = 'Pod/Classes/**/*'
   
   # s.resource_bundles = {
   #   '${POD_NAME}' => ['${POD_NAME}/Assets/*.png']
