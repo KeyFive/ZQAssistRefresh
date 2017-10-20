@@ -34,8 +34,16 @@
         {
             [strongSelf.dataSource removeAllObjects];
         }
-        [strongSelf.dataSource addObject:@(page.pageIndex)];
-        refreshSuccessBlock(RefreshStateSuccess);
+
+        if (strongSelf.dataSource.count > 5)
+        {
+            refreshSuccessBlock(RefreshStateNoData);
+        }
+        else
+        {
+            [strongSelf.dataSource addObject:@(page.pageIndex)];
+            refreshSuccessBlock(RefreshStateSuccess);
+        }
     } withPage:[RefreshPageModel pageWithSize:10 index:0]];
     [self.tableView.mj_header beginRefreshing];
 }

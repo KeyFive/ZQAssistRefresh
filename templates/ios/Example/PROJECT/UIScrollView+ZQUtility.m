@@ -69,12 +69,14 @@ static const void *noDataViewKey = &noDataViewKey;
     self.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         __strong __typeof(weakSelf) strongSelf = weakSelf;
         [page resetToFirstPage];
+        [strongSelf.mj_footer resetNoMoreData];
         refreshBlock(page, stateBlock);
         [strongSelf.mj_header endRefreshing];
     }];
 
     self.mj_footer = [MJRefreshBackStateFooter footerWithRefreshingBlock:^{
        __strong __typeof(weakSelf) strongSelf = weakSelf;
+        NSLog(@"%@",@(strongSelf.mj_footer.state));
         refreshBlock(page, stateBlock);
         [strongSelf.mj_footer endRefreshing];
     }];
@@ -158,6 +160,7 @@ static const void *noDataViewKey = &noDataViewKey;
                     if (hasData)
                     {
                         [self.mj_footer endRefreshingWithNoMoreData];
+                        NSLog(@"%@",@(self.mj_footer.state));
                         [self hideNoDataView];
                     }
                     else
