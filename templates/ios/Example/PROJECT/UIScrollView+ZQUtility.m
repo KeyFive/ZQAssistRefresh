@@ -121,6 +121,27 @@ static const void *noDataViewKey = &noDataViewKey;
     }];
 }
 
+- (void)showNoDataView
+{
+    if (!self.noDataView.superview)
+    {
+        [self addSubview:self.noDataView];
+    }
+
+    [self.noDataView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.mas_centerX);
+        make.centerY.equalTo(self.mas_centerY);
+    }];
+}
+
+- (void)hideNoDataView
+{
+    if (self.noDataView.superview)
+    {
+        [self.noDataView removeFromSuperview];
+    }
+}
+
 #pragma mark - property
 
 - (ScrollViewRefreshSuccessBlock)refreshStateBlock
@@ -163,20 +184,12 @@ static const void *noDataViewKey = &noDataViewKey;
                     if (hasData)
                     {
                         [self.mj_footer endRefreshingWithNoMoreData];
+                        [self hideNoDataView];
                     }
                     else
                     {
                             //空页面处理
-                        if (!self.noDataView.superview)
-                        {
-                            [self addSubview:self.noDataView];
-                        }
-
-                        NSLog(@"%@",self.noDataView.superview);
-                        [self.noDataView mas_makeConstraints:^(MASConstraintMaker *make) {
-                            make.centerX.equalTo(self.mas_centerX);
-                            make.centerY.equalTo(self.mas_centerY);
-                        }];
+                        [self showNoDataView];
                     }
                     [page resetToLastPage];
                     break;
@@ -187,14 +200,7 @@ static const void *noDataViewKey = &noDataViewKey;
                     if (!hasData)
                     {
                             //空页面处理
-                        if (!self.noDataView.superview)
-                        {
-                            [self addSubview:self.noDataView];
-                        }
-                        [self.noDataView mas_makeConstraints:^(MASConstraintMaker *make) {
-                            make.centerX.equalTo(self.mas_centerX);
-                            make.centerY.equalTo(self.mas_centerY);
-                        }];
+                        [self showNoDataView];
                     }
                     [page resetToLastPage];
                     break;
@@ -203,10 +209,11 @@ static const void *noDataViewKey = &noDataViewKey;
                 {
                     if (hasData)
                     {
-                        if (self.noDataView.superview)
-                        {
-                            [self.noDataView removeFromSuperview];
-                        }
+                        [self hideNoDataView];
+                    }
+                    else
+                    {
+                        [self showNoDataView];
                     }
                     break;//成功
                 }
