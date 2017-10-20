@@ -36,11 +36,6 @@
     self.pageIndex = self.beginIndex;
 }
 
-- (void)resetToLastPage
-{
-    self.pageIndex = self.lastPageIndex;
-}
-
 - (void)nextPage
 {
     self.lastPageIndex = self.pageIndex;
@@ -80,32 +75,6 @@ static const void *noDataViewKey = &noDataViewKey;
 
     self.mj_footer = [MJRefreshBackStateFooter footerWithRefreshingBlock:^{
        __strong __typeof(weakSelf) strongSelf = weakSelf;
-        if ([strongSelf isKindOfClass:[UITableView class]])
-        {
-            UITableView *tableView = (UITableView *)self;
-            BOOL firstPage = YES;
-            for (NSUInteger i = 0; i < [tableView numberOfSections]; i++)
-            {
-                if ([tableView numberOfRowsInSection:i] > 0)
-                {
-                    firstPage = NO;
-                    break;
-                }
-            }
-
-            if (firstPage)
-            {
-                [page resetToFirstPage];
-            }
-            else
-            {
-                [page nextPage];
-            }
-        }
-        else
-        {
-            [page nextPage];
-        }
         refreshBlock(page, stateBlock);
         [strongSelf.mj_footer endRefreshing];
     }];
@@ -142,15 +111,20 @@ static const void *noDataViewKey = &noDataViewKey;
     }
 }
 
+- (void)beginRefresh
+{
+    [self.mj_header beginRefreshing];
+}
+
 #pragma mark - property
 
 - (ScrollViewRefreshSuccessBlock)refreshStateBlock
 {
     ScrollViewRefreshSuccessBlock refreshStateBlock = objc_getAssociatedObject(self, scrollRefreshStateKey);
-    RefreshPageModel *page = objc_getAssociatedObject(self, scrollRefreshKey);
     if (!refreshStateBlock)
     {
         refreshStateBlock = ^(RefreshState state){
+            RefreshPageModel *page = objc_getAssociatedObject(self, scrollRefreshKey);
             BOOL hasData = NO;
             if ([self isKindOfClass:[UITableView class]])
             {
@@ -191,7 +165,6 @@ static const void *noDataViewKey = &noDataViewKey;
                             //空页面处理
                         [self showNoDataView];
                     }
-                    [page resetToLastPage];
                     break;
                 }
                 case RefreshStateNetError:
@@ -202,13 +175,13 @@ static const void *noDataViewKey = &noDataViewKey;
                             //空页面处理
                         [self showNoDataView];
                     }
-                    [page resetToLastPage];
                     break;
                 }
                 case RefreshStateSuccess:
                 {
                     if (hasData)
                     {
+                        [page nextPage];
                         [self hideNoDataView];
                     }
                     else

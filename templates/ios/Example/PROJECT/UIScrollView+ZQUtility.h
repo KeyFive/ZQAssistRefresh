@@ -16,7 +16,6 @@
 
 + (instancetype)pageWithSize:(NSUInteger)pageSize index:(NSUInteger)index;
 - (void)resetToFirstPage;
-- (void)resetToLastPage;
 - (void)nextPage;
 - (BOOL)isFirstPage;
 
@@ -39,5 +38,6 @@ typedef void(^ScrollViewRefreshBlock) (RefreshPageModel *page, ScrollViewRefresh
 
 - (void)addRefreshBlock:(ScrollViewRefreshBlock)refreshBlock withPage:(RefreshPageModel *)refreshPage;//refreshSuccessBlock:传递refresh状态的标识，控制page，以及异常页面展示
 - (void)addHeadRefreshBlock:(void(^)())block;
+- (void)beginRefresh;
 
 @end
