@@ -33,7 +33,7 @@ typedef void(^ScrollViewRefreshBlock) (RefreshPageModel *page, ScrollViewRefresh
 
 @interface UIScrollView (ZQUtility)
 
-@property (nonatomic, copy) UIView *noDataView;//需要具有instrinsic size
+@property (nonatomic, strong) UIView *noDataView;//需要具有instrinsic size
 @property (nonatomic, copy) ScrollViewRefreshSuccessBlock refreshStateBlock;
 
 - (void)addRefreshBlock:(ScrollViewRefreshBlock)refreshBlock withPage:(RefreshPageModel *)refreshPage;//refreshSuccessBlock:传递refresh状态的标识，控制page，以及异常页面展示
