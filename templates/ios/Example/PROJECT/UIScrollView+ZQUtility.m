@@ -138,6 +138,7 @@ static const void *noDataViewKey = &noDataViewKey;
                     if ([tableView numberOfRowsInSection:i] > 0)
                     {
                         hasData = YES;
+                        break;
                     }
                 }
             }
@@ -151,6 +152,7 @@ static const void *noDataViewKey = &noDataViewKey;
                     if ([collectionView numberOfItemsInSection:i] > 0)
                     {
                         hasData = YES;
+                        break;
                     }
                 }
             }

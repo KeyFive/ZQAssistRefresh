@@ -35,13 +35,16 @@
             [strongSelf.dataSource removeAllObjects];
         }
 
-        if (strongSelf.dataSource.count > 5)
+        if (strongSelf.dataSource.count > 20)
         {
             refreshSuccessBlock(RefreshStateNoData);
         }
         else
         {
-            [strongSelf.dataSource addObject:@(page.pageIndex)];
+            for (NSUInteger i = 0; i < 10; i++)
+            {
+                [strongSelf.dataSource addObject:@(page.pageIndex)];
+            }
             refreshSuccessBlock(RefreshStateSuccess);
         }
     } withPage:[RefreshPageModel pageWithSize:10 index:0]];
