@@ -53,6 +53,7 @@
 static const void *scrollRefreshKey = &scrollRefreshKey;
 static const void *scrollRefreshStateKey = &scrollRefreshStateKey;
 static const void *noDataViewKey = &noDataViewKey;
+static const void *netErrorViewKey = &netErrorViewKey;
 
 @implementation UIScrollView (Utility)
 
@@ -97,12 +98,25 @@ static const void *noDataViewKey = &noDataViewKey;
     if (!self.noDataView.superview)
     {
         [self addSubview:self.noDataView];
+        __weak __typeof(self) weakSelf = self;
+        [self.noDataView mas_makeConstraints:^(MASConstraintMaker *make) {
+            __strong __typeof(weakSelf) strongSelf = weakSelf;
+            make.center.equalTo(strongSelf);
+        }];
     }
+}
 
-    [self.noDataView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.equalTo(self.mas_centerX);
-        make.centerY.equalTo(self.mas_centerY);
-    }];
+- (void)showNetErrorView
+{
+    if (!self.netErrorView.superview)
+    {
+        [self addSubview:self.netErrorView];
+        __weak __typeof(self) weakSelf = self;
+        [self.netErrorView mas_makeConstraints:^(MASConstraintMaker *make) {
+            __strong __typeof(weakSelf) strongSelf = weakSelf;
+            make.center.equalTo(strongSelf);
+        }];
+    }
 }
 
 - (void)hideNoDataView
@@ -110,6 +124,14 @@ static const void *noDataViewKey = &noDataViewKey;
     if (self.noDataView.superview)
     {
         [self.noDataView removeFromSuperview];
+    }
+}
+
+- (void)hideNetErrorView
+{
+    if (self.netErrorView.superview)
+    {
+        [self.netErrorView removeFromSuperview];
     }
 }
 
@@ -126,6 +148,8 @@ static const void *noDataViewKey = &noDataViewKey;
     if (!refreshStateBlock)
     {
         refreshStateBlock = ^(RefreshState state){
+            [self hideNetErrorView];
+            [self hideNoDataView];
             RefreshPageModel *page = objc_getAssociatedObject(self, scrollRefreshKey);
             BOOL hasData = NO;
             if ([self isKindOfClass:[UITableView class]])
@@ -162,8 +186,6 @@ static const void *noDataViewKey = &noDataViewKey;
                     if (hasData)
                     {
                         [self.mj_footer endRefreshingWithNoMoreData];
-                        NSLog(@"%@",@(self.mj_footer.state));
-                        [self hideNoDataView];
                     }
                     else
                     {
@@ -178,7 +200,7 @@ static const void *noDataViewKey = &noDataViewKey;
                     if (!hasData)
                     {
                             //空页面处理
-                        [self showNoDataView];
+                        [self showNetErrorView];
                     }
                     break;
                 }
@@ -187,7 +209,6 @@ static const void *noDataViewKey = &noDataViewKey;
                     if (hasData)
                     {
                         [page nextPage];
-                        [self hideNoDataView];
                     }
                     else
                     {
@@ -223,9 +244,28 @@ static const void *noDataViewKey = &noDataViewKey;
     return noDataView;
 }
 
+- (UIView *)netErrorView
+{
+    UIView *netErrorView = objc_getAssociatedObject(self, netErrorViewKey);
+    if (!netErrorView)
+    {
+        UILabel *netErrorLabel = [[UILabel alloc] init];
+        netErrorLabel.textColor = [UIColor lightGrayColor];
+        netErrorLabel.text = @"网络加载出错，清稍后再试";
+        netErrorView = netErrorLabel;
+        objc_setAssociatedObject(self, netErrorViewKey, netErrorView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return netErrorView;
+}
+
 - (void)setNoDataView:(UIView *)noDataView
 {
     objc_setAssociatedObject(self, noDataViewKey, noDataView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)setNetErrorView:(UIView *)netErrorView
+{
+    objc_setAssociatedObject(self, netErrorViewKey, netErrorView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
