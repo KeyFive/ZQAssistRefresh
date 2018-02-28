@@ -93,6 +93,16 @@ static const void *netErrorViewKey = &netErrorViewKey;
     }];
 }
 
+- (void)addFooterRefreshBlock:(void(^)())block
+{
+    __weak __typeof(self) weakSelf = self;
+    self.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        __strong __typeof(weakSelf) strongSelf = weakSelf;
+        block();
+        [strongSelf.mj_header endRefreshing];
+    }];
+}
+
 - (void)showNoDataView
 {
     if (!self.noDataView.superview)
