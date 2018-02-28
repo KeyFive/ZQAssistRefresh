@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ZQAssistRefresh'
-  s.version          = '0.7.0'
+  s.version          = '0.8.0'
   s.summary          = '一款辅助上拉刷新，下拉加载的工具'
 
 # This description is used to generate tags and improve search results.
