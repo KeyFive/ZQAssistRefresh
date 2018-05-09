@@ -72,34 +72,36 @@ static const void *netErrorViewKey = &netErrorViewKey;
         [page resetToFirstPage];
         [strongSelf.mj_footer resetNoMoreData];
         refreshBlock(page, stateBlock);
-        [strongSelf.mj_header endRefreshing];
     }];
 
     self.mj_footer = [MJRefreshBackStateFooter footerWithRefreshingBlock:^{
-       __strong __typeof(weakSelf) strongSelf = weakSelf;
-        NSLog(@"%@",@(strongSelf.mj_footer.state));
         refreshBlock(page, stateBlock);
-        [strongSelf.mj_footer endRefreshing];
     }];
 }
 
-- (void)addHeadRefreshBlock:(void(^)())block
+- (void)addHeadRefreshBlock:(void(^)(void(^)(void)))block;
 {
     __weak __typeof(self) weakSelf = self;
     self.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         __strong __typeof(weakSelf) strongSelf = weakSelf;
-        block();
-        [strongSelf.mj_header endRefreshing];
+        __weak __typeof(strongSelf) weakSelf = strongSelf;
+        block(^{
+            __strong __typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf.mj_header endRefreshing];
+        });
     }];
 }
 
-- (void)addFooterRefreshBlock:(void(^)())block
+- (void)addFooterRefreshBlock:(void(^)(void(^)(void)))block
 {
     __weak __typeof(self) weakSelf = self;
     self.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
         __strong __typeof(weakSelf) strongSelf = weakSelf;
-        block();
-        [strongSelf.mj_header endRefreshing];
+        __weak __typeof(strongSelf) weakSelf = strongSelf;
+        block(^{
+            __strong __typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf.mj_footer endRefreshing];
+        });
     }];
 }
 
@@ -157,78 +159,94 @@ static const void *netErrorViewKey = &netErrorViewKey;
     ScrollViewRefreshSuccessBlock refreshStateBlock = objc_getAssociatedObject(self, scrollRefreshStateKey);
     if (!refreshStateBlock)
     {
+        __weak __typeof(self) weakSelf = self;
         refreshStateBlock = ^(RefreshState state){
-            [self hideNetErrorView];
-            [self hideNoDataView];
-            RefreshPageModel *page = objc_getAssociatedObject(self, scrollRefreshKey);
-            BOOL hasData = NO;
-            if ([self isKindOfClass:[UITableView class]])
-            {
-                UITableView *tableView = (UITableView *)self;
-                [tableView reloadData];
-                NSUInteger sectionCount = tableView.numberOfSections;
-                for (NSUInteger i = 0; i < sectionCount; i++)
+            __strong __typeof(weakSelf) strongSelf = weakSelf;
+            __weak __typeof(strongSelf) weakSelf = strongSelf;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                __strong __typeof(weakSelf) strongSelf = weakSelf;
+                [strongSelf hideNetErrorView];
+                [strongSelf hideNoDataView];
+                RefreshPageModel *page = objc_getAssociatedObject(self, scrollRefreshKey);
+                BOOL hasData = NO;
+                if ([strongSelf isKindOfClass:[UITableView class]])
                 {
-                    if ([tableView numberOfRowsInSection:i] > 0)
+                    UITableView *tableView = (UITableView *)self;
+                    [tableView reloadData];
+                    NSUInteger sectionCount = tableView.numberOfSections;
+                    for (NSUInteger i = 0; i < sectionCount; i++)
                     {
-                        hasData = YES;
-                        break;
+                        if ([tableView numberOfRowsInSection:i] > 0)
+                        {
+                            hasData = YES;
+                            break;
+                        }
                     }
                 }
-            }
-            else if ([self isKindOfClass:[UICollectionView class]])
-            {
-                UICollectionView *collectionView = (UICollectionView *)self;
-                [collectionView reloadData];
-                NSUInteger sectionCount = collectionView.numberOfSections;
-                for (NSUInteger i = 0; i < sectionCount; i++)
+                else if ([strongSelf isKindOfClass:[UICollectionView class]])
                 {
-                    if ([collectionView numberOfItemsInSection:i] > 0)
+                    UICollectionView *collectionView = (UICollectionView *)self;
+                    [collectionView reloadData];
+                    NSUInteger sectionCount = collectionView.numberOfSections;
+                    for (NSUInteger i = 0; i < sectionCount; i++)
                     {
-                        hasData = YES;
-                        break;
+                        if ([collectionView numberOfItemsInSection:i] > 0)
+                        {
+                            hasData = YES;
+                            break;
+                        }
                     }
                 }
-            }
-            switch (state) {
-                case RefreshStateNoData:
+                if ([page isFirstPage])
                 {
-                    if (hasData)
+                    [strongSelf.mj_header endRefreshing];
+                }
+                else{
+                    if (state == RefreshStateNoData && hasData)
                     {
-                        [self.mj_footer endRefreshingWithNoMoreData];
+                        [strongSelf.mj_footer endRefreshingWithNoMoreData];
                     }
                     else
                     {
-                            //空页面处理
-                        [self showNoDataView];
+                        [strongSelf.mj_footer endRefreshing];
                     }
-                    break;
                 }
-                case RefreshStateNetError:
-                {
-                        //网络异常处理
-                    if (!hasData)
+                switch (state) {
+                    case RefreshStateNoData:
                     {
-                            //空页面处理
-                        [self showNetErrorView];
+                        if (!hasData)
+                        {
+                                //空页面处理
+                            [strongSelf showNoDataView];
+                        }
+                        break;
                     }
-                    break;
+                    case RefreshStateNetError:
+                    {
+                            //网络异常处理
+                        if (!hasData)
+                        {
+                                //空页面处理
+                            [strongSelf showNetErrorView];
+                        }
+                        break;
+                    }
+                    case RefreshStateSuccess:
+                    {
+                        if (hasData)
+                        {
+                            [page nextPage];
+                        }
+                        else
+                        {
+                            [strongSelf showNoDataView];
+                        }
+                        break;//成功
+                    }
+                    default:
+                        break;
                 }
-                case RefreshStateSuccess:
-                {
-                    if (hasData)
-                    {
-                        [page nextPage];
-                    }
-                    else
-                    {
-                        [self showNoDataView];
-                    }
-                    break;//成功
-                }
-                default:
-                    break;
-            }
+            });
         };
         objc_setAssociatedObject(self, scrollRefreshStateKey, refreshStateBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
     }

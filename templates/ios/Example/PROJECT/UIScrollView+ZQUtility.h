@@ -28,7 +28,7 @@ typedef NS_ENUM(NSUInteger,RefreshState)
     RefreshStateNetError
 };
 
-typedef void(^ScrollViewRefreshSuccessBlock) (RefreshState refresgState);
+typedef void(^ScrollViewRefreshSuccessBlock) (RefreshState refreshState);
 typedef void(^ScrollViewRefreshBlock) (RefreshPageModel *page, ScrollViewRefreshSuccessBlock refreshSuccessBlock);
 
 @interface UIScrollView (ZQUtility)
@@ -38,8 +38,8 @@ typedef void(^ScrollViewRefreshBlock) (RefreshPageModel *page, ScrollViewRefresh
 @property (nonatomic, copy) ScrollViewRefreshSuccessBlock refreshStateBlock;
 
 - (void)addRefreshBlock:(ScrollViewRefreshBlock)refreshBlock withPage:(RefreshPageModel *)refreshPage;//refreshSuccessBlock:传递refresh状态的标识，控制page，以及异常页面展示
-- (void)addHeadRefreshBlock:(void(^)())block;
-- (void)addFooterRefreshBlock:(void(^)())block;
+- (void)addHeadRefreshBlock:(void(^)(void(^)(void)))block;
+- (void)addFooterRefreshBlock:(void(^)(void(^)(void)))block;
 - (void)beginRefresh;
 
 @end
