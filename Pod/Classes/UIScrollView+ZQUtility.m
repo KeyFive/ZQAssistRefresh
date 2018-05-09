@@ -10,7 +10,7 @@
 #import "UIScrollView+ZQUtility.h"
 #import <Masonry/Masonry.h>
 
-@interface RefreshPageModel()
+@interface RefreshPageModel()<NSCopying>
 
 @property (nonatomic, assign) NSUInteger beginIndex;
 @property (nonatomic, assign, readwrite) NSUInteger pageSize;
@@ -47,6 +47,13 @@
     return self.pageIndex == self.beginIndex;
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+    RefreshPageModel *page = [RefreshPageModel pageWithSize:self.pageSize index:self.pageIndex];
+    page.lastPageIndex = self.lastPageIndex;
+    return page;
+}
+
 @end
 
 
@@ -70,12 +77,14 @@ static const void *netErrorViewKey = &netErrorViewKey;
     self.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         __strong __typeof(weakSelf) strongSelf = weakSelf;
         [page resetToFirstPage];
+        RefreshPageModel *temPage = [page copy];
         [strongSelf.mj_footer resetNoMoreData];
-        refreshBlock(page, stateBlock);
+        refreshBlock(temPage, stateBlock);
     }];
 
     self.mj_footer = [MJRefreshBackStateFooter footerWithRefreshingBlock:^{
-        refreshBlock(page, stateBlock);
+        RefreshPageModel *temPage = [page copy];
+        refreshBlock(temPage, stateBlock);
     }];
 }
 
@@ -279,7 +288,7 @@ static const void *netErrorViewKey = &netErrorViewKey;
     {
         UILabel *netErrorLabel = [[UILabel alloc] init];
         netErrorLabel.textColor = [UIColor lightGrayColor];
-        netErrorLabel.text = @"网络加载出错，清稍后再试";
+        netErrorLabel.text = @"网络加载出错，请稍后再试";
         netErrorView = netErrorLabel;
         objc_setAssociatedObject(self, netErrorViewKey, netErrorView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
