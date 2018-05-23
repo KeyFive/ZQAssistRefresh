@@ -49,7 +49,8 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    RefreshPageModel *page = [RefreshPageModel pageWithSize:self.pageSize index:self.pageIndex];
+    RefreshPageModel *page = [RefreshPageModel pageWithSize:self.pageSize index:self.beginIndex];
+    page.pageIndex = self.pageIndex;
     page.lastPageIndex = self.lastPageIndex;
     return page;
 }

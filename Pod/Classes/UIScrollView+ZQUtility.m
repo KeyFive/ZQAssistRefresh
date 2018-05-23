@@ -49,7 +49,8 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    RefreshPageModel *page = [RefreshPageModel pageWithSize:self.pageSize index:self.pageIndex];
+    RefreshPageModel *page = [RefreshPageModel pageWithSize:self.pageSize index:self.beginIndex];
+    page.pageIndex = self.pageIndex;
     page.lastPageIndex = self.lastPageIndex;
     return page;
 }
@@ -209,6 +210,10 @@ static const void *netErrorViewKey = &netErrorViewKey;
                 if ([page isFirstPage])
                 {
                     [strongSelf.mj_header endRefreshing];
+                    if (strongSelf.mj_footer.state != MJRefreshStateIdle || strongSelf.mj_footer.state != MJRefreshStateNoMoreData)
+                    {
+                        [strongSelf.mj_footer endRefreshing];
+                    }
                 }
                 else{
                     if (state == RefreshStateNoData && hasData)
@@ -297,11 +302,21 @@ static const void *netErrorViewKey = &netErrorViewKey;
 
 - (void)setNoDataView:(UIView *)noDataView
 {
+    UIView *oldView = objc_getAssociatedObject(self, noDataViewKey);
+    if (oldView && oldView.superview)
+    {
+        [oldView removeFromSuperview];
+    }
     objc_setAssociatedObject(self, noDataViewKey, noDataView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)setNetErrorView:(UIView *)netErrorView
 {
+    UIView *oldView = objc_getAssociatedObject(self, netErrorViewKey);
+    if (oldView && oldView.superview)
+    {
+        [oldView removeFromSuperview];
+    }
     objc_setAssociatedObject(self, netErrorViewKey, netErrorView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
